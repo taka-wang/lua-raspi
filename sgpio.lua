@@ -1,7 +1,7 @@
 ------------------------------------------------------
 --- Simple GPIO Control (sysfs method)
---- @release Version: 0.1.1
---- Date: 20130110
+--- @release Version: 0.2.1
+--- Date: 20130115
 --- @author: Taka Wang <wang.chia.ming@gmail.com>
 ---
 --- Usage:
@@ -14,6 +14,19 @@
 ------------------------------------------------------
 
 module(..., package.seeall)
+
+-------------------------------------------------------
+-- msleep adapter from GPIO module. Written by Mike Pall.
+local ffi = require("ffi")
+local C = ffi.C
+
+ffi.cdef[[
+int poll(struct pollfd *fds, unsigned long nfds, int timeout);
+]]
+
+function msleep(ms)
+  C.poll(nil, 0, ms)
+end
 
 ------------------------------------------------------
 -- export and set direction
@@ -54,4 +67,20 @@ function get(pin)
     s = f:read ("*l") -- read one line
     f:close ()  -- close that file now
     return tonumber(s)
+end
+
+-------------------------------------------------------
+-- port from RCtime.py. 
+-- http://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi/basic-photocell-reading
+function rctime(pin, ms)
+    reading = 0
+    gpio.open(pin, "out")
+    gpio.set(pin, 0)
+    msleep(ms)
+    gpio.close(pin)
+    gpio.open(pin, "in")
+    while (gpio.get(pin) == 0) do
+        reading = reading + 1
+    end
+    return reading
 end
