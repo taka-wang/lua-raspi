@@ -16,8 +16,8 @@ pin = 17
 gpio.open(pin, "out")
 for i = 1, tonumber(arg[1]) do
     gpio.set(pin, 1)
-    os.execute("sleep 1")
+    gpio.msleep(1000)
     gpio.set(pin, 0)
-    os.execute("sleep 0.1")
+    gpio.msleep(100)
 end
-gpio.close(17)
+gpio.close(pin)
